@@ -85,14 +85,12 @@ export const formatTime = (timestamp: number, timezoneOffsetSeconds: number) => 
 };
 
 export const createForecastMessage = (res: WeatherResponse): string => {
-  const text = `The current weather in ${res.name},${res.sys.country} is characterized by ${
-    res.weather[0].description
-  }, with a temperature of ${res.main.temp}°C. The humidity level is ${
-    res.main.humidity
-  }%, and the wind speed is ${res.wind.speed.toFixed()} m/s. Looking ahead to today, the sun will rise at ${formatTime(
-    res.sys.sunrise,
-    res.timezone
-  )} and set at ${formatTime(res.sys.sunset, res.timezone)} local time.
-    `;
-  return text;
+  const { name, sys, weather, main, wind, timezone } = res;
+  const description = weather[0].description;
+  const sunrise = formatTime(sys.sunrise, timezone);
+  const sunset = formatTime(sys.sunset, timezone);
+  const windSpeed = wind.speed.toFixed(1);
+  const temperature = main.temp.toFixed(1);
+  const humidity = main.humidity;
+  return `The current weather in ${name},${sys.country} is characterized by ${description},with a temperature of ${temperature}°C. The humidity level is ${humidity}%, and the wind speed is ${windSpeed} m/s. The sun will rise at ${sunrise} and set at ${sunset} local time.`;
 };
