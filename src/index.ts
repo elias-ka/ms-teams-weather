@@ -1,32 +1,47 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
+import { IRequestStrict, Router, error, json } from "itty-router";
+import { createForecastMessage, getWeather, parseCityAndCountry } from "./weather";
+import { Env } from "./env";
+import { verifySignature } from "./signature";
 
-export interface Env {
-	// Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
-	// MY_KV_NAMESPACE: KVNamespace;
-	//
-	// Example binding to Durable Object. Learn more at https://developers.cloudflare.com/workers/runtime-apis/durable-objects/
-	// MY_DURABLE_OBJECT: DurableObjectNamespace;
-	//
-	// Example binding to R2. Learn more at https://developers.cloudflare.com/workers/runtime-apis/r2/
-	// MY_BUCKET: R2Bucket;
-	//
-	// Example binding to a Service. Learn more at https://developers.cloudflare.com/workers/runtime-apis/service-bindings/
-	// MY_SERVICE: Fetcher;
-	//
-	// Example binding to a Queue. Learn more at https://developers.cloudflare.com/queues/javascript-apis/
-	// MY_QUEUE: Queue;
-}
+const USAGE =
+  "usage: Mention the bot with the city name and country code (e.g. @Weather Helsinki,FI). Note that the country code is optional, but recommended to avoid ambiguity.";
+const INVALID_SIGNATURE = "Invalid signature";
+const ERROR_FETCHING_WEATHER = "Error fetching weather data";
+
+const router = Router();
+
+router.post("/weather", async (request: IRequestStrict, env: Env) => {
+  if (!verifySignature(request, env.MS_TEAMS_SECRET)) {
+    return new Response(INVALID_SIGNATURE, { status: 401 });
+  }
+
+  const json = await request.json();
+  if (!json) {
+    return new Response(USAGE, { status: 400 });
+  }
+
+  // @ts-ignore
+  const parsed = parseCityAndCountry(json.text);
+  if (!parsed) {
+    return new Response(USAGE, { status: 400 });
+  }
+
+  const { city, country } = parsed;
+  const res = await getWeather(city, country, env);
+  if (res.cod !== 200) {
+    return new Response(ERROR_FETCHING_WEATHER, { status: 500 });
+  }
+
+  return Response.json({ type: "message", text: createForecastMessage(res) });
+});
+
+router.all("*", () => new Response("Not Found!", { status: 404 }));
 
 export default {
-	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-		return new Response('Hello World!');
-	},
+  fetch(request: Request, env: Env, ...args: any) {
+    return router
+      .handle(request, env, ...args)
+      .then(json)
+      .catch(error);
+  },
 };
