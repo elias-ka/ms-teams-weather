@@ -52,11 +52,12 @@ const openWeatherMap = fetcher({
 });
 
 export const parseCityAndCountry = (text: string) => {
-  const matches = text.match(/<at>Weather<at>\s*([^,]+)(?:,\s*([A-Z]{2,3}))?/);
-  if (!matches) {
-    return null;
-  }
-  return { city: matches[1], country: matches[2] };
+  // <at>Weather<at> <city>, <country>
+  // skip the <at>Weather<at> part
+  const parts = text.split(" ").slice(1);
+  const city = parts[0].trim();
+  const country = parts[1] ? parts[1].trim() : "";
+  return { city, country };
 };
 
 export const getWeather = async (city: string, country: string, env: Env): Promise<WeatherResponse> => {
