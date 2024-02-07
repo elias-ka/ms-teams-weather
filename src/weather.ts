@@ -52,7 +52,7 @@ const openWeatherMap = fetcher({
 });
 
 export const parseCityAndCountry = (text: string) => {
-  const matches = text.match(/<at>Weather<\/at>\s+([^,]+)(?:,([A-Z]{2}))?/);
+  const matches = text.match(/<at>Weather<at>\s*([^,]+)(?:,\s*([A-Z]{2,3}))?/);
   if (!matches) {
     return null;
   }
