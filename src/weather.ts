@@ -92,5 +92,5 @@ export const createForecastMessage = (res: WeatherResponse): string => {
   const windSpeed = wind.speed.toFixed(1);
   const temperature = main.temp.toFixed(1);
   const humidity = main.humidity;
-  return `The current weather in ${name},${sys.country} is characterized by ${description},with a temperature of ${temperature}°C. The humidity level is ${humidity}%, and the wind speed is ${windSpeed} m/s. The sun will rise at ${sunrise} and set at ${sunset} local time.`;
+  return `The current weather in ${name}, ${sys.country} is characterized by ${description}, with a temperature of ${temperature}°C. The humidity level is ${humidity}%, and the wind speed is ${windSpeed} m/s. The sun will rise at ${sunrise} and set at ${sunset} local time.`;
 };
