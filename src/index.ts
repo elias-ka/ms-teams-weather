@@ -20,7 +20,7 @@ router.post("/weather", async (request: IRequestStrict, env: Env) => {
     return new Response(USAGE, { status: 400 });
   }
 
-  // @ts-ignore
+  // @ts-ignore - can't be bothered to strictly type the whole MS Teams request object
   const parsed = parseCityAndCountry(json.text);
   if (!parsed) {
     return new Response(USAGE, { status: 400 });
@@ -35,6 +35,7 @@ router.post("/weather", async (request: IRequestStrict, env: Env) => {
   return Response.json({ type: "message", text: createForecastMessage(res) });
 });
 
+// Handle all other requests with a 404 Not Found response
 router.all("*", () => new Response("Not Found!", { status: 404 }));
 
 export default {

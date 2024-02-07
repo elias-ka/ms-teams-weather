@@ -1,6 +1,11 @@
 import { IRequestStrict } from "itty-router";
 
-// Verifies the HMAC SHA-256 signature of a request against a secret.
+/**
+ * Verifies the signature of the given request.
+ * @param req The request to verify.
+ * @param secret The secret to use for verification.
+ * @returns A promise that resolves to true if the signature is valid, or false otherwise.
+ */
 export const verifySignature = async (req: IRequestStrict, secret: string) => {
   const signature = req.headers.get("authorization");
   if (!signature || !secret) {

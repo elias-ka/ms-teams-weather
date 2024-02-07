@@ -1,6 +1,9 @@
 import { fetcher } from "itty-fetcher";
 import { Env } from "./env";
 
+/**
+ * Represents the object returned by the OpenWeatherMap API.
+ */
 export interface WeatherResponse {
   coord: {
     lon: number;
@@ -51,8 +54,17 @@ const openWeatherMap = fetcher({
   },
 });
 
+/**
+ * Parses the city and country from the given text.
+ * Assumes the text is in the MS Teams format "\<at>Weather\<at> \<city\>, \<country\>".
+ *
+ * @param text The text to parse.
+ * @returns An object with the parsed city and country.
+ * @example
+ * parseCityAndCountry("<at>Weather<at> New York, US");
+ * // => { city: "New York", country: "US" }
+ */
 export const parseCityAndCountry = (text: string) => {
-  // <at>Weather<at> <city>, <country>
   // skip the <at>Weather<at> part
   const parts = text.split(" ").slice(1);
   const city = parts[0].trim();
@@ -60,6 +72,13 @@ export const parseCityAndCountry = (text: string) => {
   return { city, country };
 };
 
+/**
+ * Retrieves the weather information for a specific city and country.
+ * @param city - The name of the city.
+ * @param country - Optional ISO 3166 country code.
+ * @param env - The environment configuration object.
+ * @returns A promise that resolves to the weather response.
+ */
 export const getWeather = async (city: string, country: string, env: Env): Promise<WeatherResponse> => {
   const query = `${city}${country ? `,${country}` : ""}`;
   return (await openWeatherMap.get(
@@ -67,12 +86,17 @@ export const getWeather = async (city: string, country: string, env: Env): Promi
   )) as WeatherResponse;
 };
 
-// Format the time to the local timezone of the city.
-// e.g. if the city is in UTC-5, the local time at that place is 5 hours behind UTC + the timezone offset of the local computer.
-// Not optimal but works as intended, and I'd prefer not to pull in a library for this.
-// Tested manually by Googling the sunrise/sunset times for different cities around the world,
-// but I'm not sure if daylight saving is accounted for.
+/**
+ * Formats a timestamp into a localized time string.
+ * @param timestamp - The timestamp to format.
+ * @param timezoneOffsetSeconds - The timezone offset in seconds.
+ * @returns The formatted time string.
+ */
 export const formatTime = (timestamp: number, timezoneOffsetSeconds: number) => {
+  // If a city is in UTC-5, the local time at that place is 5 hours behind UTC + the timezone offset of the local computer.
+  // Not optimal but works as intended, and I'd prefer not to pull in a library for this.
+  // Tested manually by Googling the sunrise/sunset times for different cities around the world,
+  // but I'm not sure if daylight saving is accounted for.
   const MS_PER_SECOND = 1000;
   const MS_PER_MINUTE = MS_PER_SECOND * 60;
   const date = new Date(timestamp * 1000);
@@ -85,6 +109,11 @@ export const formatTime = (timestamp: number, timezoneOffsetSeconds: number) => 
   });
 };
 
+/**
+ * Creates a nice forecast message from the given weather response.
+ * @param res - The weather response to create a message from.
+ * @returns The forecast message.
+ */
 export const createForecastMessage = (res: WeatherResponse): string => {
   const { name, sys, weather, main, wind, timezone } = res;
   const description = weather[0].description;
