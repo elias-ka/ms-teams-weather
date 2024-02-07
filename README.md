@@ -1,8 +1,10 @@
 # ms-teams-weather
- The implementation of a weather bot for Microsoft Teams done for a school assignment.
+Microsoft Teams bot that fetches the current weather for a specified city and country.
+Done as a part of a Cloud Services course at Oulu University of Applied Sciences.
+
  It handles incoming requests to fetch weather data for a specified city and country.
  The bot verifies the request signature, parses the city and country from the request payload,
- fetches the weather data, and returns a forecast message as a response back to the user.§
+ fetches the weather data, and returns a forecast message as a response back to the user.
 
 ## Example usage
 To use the bot, you need to deploy it using the instructions below.
@@ -29,10 +31,9 @@ Install dependencies:
 $ npm install
 ```
 
-Set the environment variables in Wrangler:
+Set the OpenWeatherMap API key in CloudFlare secrets:
 ```bash
 $ npx wrangler secret put OPEN_WEATHER_MAP_API_KEY
-$ npx wrangler secret put MS_TEAMS_SECRET
 ```
 
 Deploy the bot to CloudFlare and follow the instructions:
@@ -46,4 +47,14 @@ Go to your Microsoft Teams team and go to ``Manage Team -> Apps -> Create an out
 - Description: Get the current weather at a city. Example: @Weather Helsinki, FI
 - Optionally, you can set a profile picture for the bot.
 
-For more information, see the [official documentation](https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=javascript).
+After you've created the webhook, copy the HMAC token from the dialogue and set it as a secret in CloudFlare:
+```bash
+$ npx wrangler secret put MS_TEAMS_SECRET
+```
+
+Finally, redeploy the bot to CloudFlare:
+```bash
+$ npm run deploy
+```
+
+For more information, see the [official documentation](https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-outgoing-webhook?tabs=urljsonpayload%2Cjavascript#create-outgoing-webhooks-1).
