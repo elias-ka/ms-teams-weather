@@ -8,7 +8,7 @@ Done as a part of a Cloud Services course at Oulu University of Applied Sciences
 
 ## Example usage
 To use the bot, you need to deploy it using the instructions below.
-After that, you can use the bot by mentioning it in a channel and providing the city and country you want to get the weather for.
+Once deployed, use the bot by mentioning it in a channel and providing the city and country you want to get the weather for.
 
 For example:
 > @Weather Helsinki, FI
@@ -16,43 +16,50 @@ For example:
 >The current weather in Helsinki, FI is characterized by few clouds, with a temperature of -10.1°C. The humidity level is 79%, and the wind speed is 5.4 m/s. The sun will rise at 08:22 AM and set at 04:46 PM local time.
 
 ## Deployment
-To deploy the bot, you need to have a [CloudFlare](https://www.cloudflare.com/) account, an [OpenWeatherMap](https://openweathermap.org/api) API key, and a [Microsoft Teams](https://www.microsoft.com/en-us/microsoft-teams/group-chat-software) team where you have the necessary permissions to install apps.
+### Prerequisites
+- [CloudFlare](https://www.cloudflare.com/) account
+- [OpenWeatherMap](https://openweathermap.org/api) API key
+- [Microsoft Teams](https://www.microsoft.com/en-us/microsoft-teams/group-chat-software) team where you have the necessary permissions to install apps
 
 After you have met the prerequisites, you can deploy the bot by following these steps:
 
-Clone the repository:
+1. **Clone the repository:**
 ```bash
 $ git clone git@github.com:elias-ka/ms-teams-weather.git
 $ cd ms-teams-weather
 ```
 
-Install dependencies:
-```
+2. **Install dependencies:**
+```bash
 $ npm install
 ```
 
-Set the OpenWeatherMap API key in CloudFlare secrets:
+3. **Set the OpenWeatherMap API key in CloudFlare secrets:**
 ```bash
 $ npx wrangler secret put OPEN_WEATHER_MAP_API_KEY
 ```
 
-Deploy the bot to CloudFlare and follow the instructions:
+4. **Deploy the bot to CloudFlare and follow the instructions:**
 ```bash
 $ npm run deploy
 ```
 
-Go to your Microsoft Teams team and go to ``Manage Team -> Apps -> Create an outgoing webhook`` and set the following values:
-- Name: Weather
-- Callback URL: https://\<your-worker-name\>.workers.dev/weather
-- Description: Get the current weather at a city. Example: @Weather Helsinki, FI
-- Optionally, you can set a profile picture for the bot.
+5. **Create an outgoing webhook in Microsoft Teams:**
+- Go to your Microsoft Teams team and go to `Manage Team -> Apps -> Create an outgoing webhook`
+- Set the following values:
+  - Name: Weather
+  - Callback URL: https://\<your-worker-name\>.workers.dev/weather
+  - Description: Get the current weather at a city. Example: @Weather Helsinki, FI
+  - Optionally, you can set a profile picture for the bot.
+- Click `Create` to create the webhook.
+- Copy the `HMAC token` from the dialogue, as you will need it in the next step.
 
-After you've created the webhook, copy the HMAC token from the dialogue and set it as a secret in CloudFlare:
+6. **Set the HMAC token as a CloudFlare secret:**
 ```bash
 $ npx wrangler secret put MS_TEAMS_SECRET
 ```
 
-Finally, redeploy the bot to CloudFlare:
+7. **Finally, redeploy the bot to CloudFlare:**
 ```bash
 $ npm run deploy
 ```
